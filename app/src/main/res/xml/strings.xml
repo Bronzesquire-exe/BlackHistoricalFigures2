@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name = "correct"> True </string>
+    <string name = "wrong"> False </string>
+    <string name = "title">Black Historical Figures Quiz</string>
+    <string name = "q1"> Did Harriet Tubman Work For the US Government?</string>
+    <string name = "q2">Frederick Douglass fought off one of his masters.</string>
+    <string name= "q3">The Haitian revolution ended in 1802.</string>
+    <string name = "q4">Rosa Park was the first person to refuse to give up her bus seat.</string>
+    <string name = "q5">Mansa Musa expanded the Mali Empire to include Timbuktu a center for learning.</string>
+    <string name = "result"> You Got</string>
+    <string name = "h1"> Harriet served in Union army as a nurse, cook, scout, and spy</string>
+    <string name = "h2">The master at the time was Edward Covey </string>
+    <string name = "h3"> It ended after 13 years</string>
+    <string name = "h4">Montgomery Alabama was their birth place</string>
+    <string name = "h5">Mansa was interested in learning, he built numerous schools and universities</string>
+
+
+
+</resources>
