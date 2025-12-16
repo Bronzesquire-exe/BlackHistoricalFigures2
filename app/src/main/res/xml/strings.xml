@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Black Historical Figures</string>
     <string name = "correct"> True </string>
     <string name = "wrong"> False </string>
     <string name = "title">Black Historical Figures Quiz</string>

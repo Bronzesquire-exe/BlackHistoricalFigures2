@@ -50,29 +50,20 @@
         app:layout_constraintVertical_bias="0.637"
 
         tools:ignore="MissingConstraints" />
-<TextView
-    android:id="@+id/QuestionText"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:gravity="center"
-    android:textSize="24sp"
-    app:layout_constraintBaseline_toTopOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    />
-    <TextView
-        android:layout_width="352dp"
-        android:layout_height="67dp"
-        android:gravity="center"
-        android:text="@string/q4"
-        android:textSize="30dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.289"
 
-        />
+
+    <TextView
+        android:id="@+id/QuestionText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="24sp"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:layout_editor_absoluteY="211dp"
+        tools:ignore="MissingConstraints" />
 
     <Button
         android:id="@+id/TrueButton"
