@@ -1,0 +1,29 @@
+{
+  "questions": [
+    {
+      "questionText": "Harriet Tubman was a conductor on the Underground Railroad",
+      "rightAnswer": true,
+      "hint": "She made 13 missions to rescue enslaved people"
+    },
+    {
+      "questionText": "Frederick Douglass was born a free man",
+      "rightAnswer": false,
+      "hint": "He escaped slavery in 1838"
+    },
+    {
+      "questionText": "Rosa Parks refused to give up her seat on a bus",
+      "rightAnswer": true,
+      "hint": "This happened in Montgomery, Alabama in 1955"
+    },
+    {
+      "questionText": "Martin Luther King Jr. was assassinated in 1968",
+      "rightAnswer": true,
+      "hint": "He was in Memphis, Tennessee"
+    },
+    {
+      "questionText": "Malcolm X was a proponent of non-violent resistance",
+      "rightAnswer": false,
+      "hint": "He advocated for self-defense and Black empowerment"
+    }
+  ]
+}
