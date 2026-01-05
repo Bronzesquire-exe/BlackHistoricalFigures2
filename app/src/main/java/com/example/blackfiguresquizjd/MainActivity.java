@@ -1,159 +1,190 @@
 package com.example.blackfiguresquizjd;
 
-
-
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String PREFS_NAME = "QuizPrefs";
+    private static final String HIGH_SCORE_KEY = "HighScore";
+
     private int Score = 0;
     private int currentind = 0;
-    private boolean CorrectA;
-    private boolean WrongA;
-    
+    private int highScore = 0;
 
-
-    private Question[] questions;
+    private List<Question> questions;
     private Button falseB;
     private Button trueB;
-
     private TextView Correct;
-
     private TextView Wrong;
-
     private TextView QuestionText;
     private Button hintButton;
-    private String[] hints;
     private Button Gamble;
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         QuestionText = findViewById(R.id.QuestionText);
         Gamble = findViewById(R.id.letsgamble);
-        Correct = (TextView) findViewById(R.id.IfCorrect);
-        Wrong = (TextView) findViewById(R.id.IfWrong);
-        falseB = (Button) findViewById(R.id.FalseButton);
-        trueB = (Button) findViewById(R.id.TrueButton);
+        Correct = findViewById(R.id.IfCorrect);
+        Wrong = findViewById(R.id.IfWrong);
+        falseB = findViewById(R.id.FalseButton);
+        trueB = findViewById(R.id.TrueButton);
         hintButton = findViewById(R.id.Hint);
+
         Correct.setVisibility(View.INVISIBLE);
         Wrong.setVisibility(View.INVISIBLE);
 
 
-Gamble.setOnClickListener(new View.OnClickListener(){
-    public void onClick(View v){
-        gamble();
-    }
-});
-hintButton.setOnClickListener(new View.OnClickListener(){
-    public void onClick(View v){
-     if (currentind < hints.length) {
-         Toast.makeText(MainActivity.this, hints[currentind], Toast.LENGTH_SHORT).show();
-     }
-    }
-});
-
-         questions = new Question[]{
-                new Question(getString(R.string.q1), true),
-                new Question(getString(R.string.q2), true),
-                new Question(getString(R.string.q3), false),
-                new Question(getString(R.string.q4), false),
-                new Question(getString(R.string.q5), true)
-
-        };
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+        highScore = prefs.getInt(HIGH_SCORE_KEY, 0);
 
 
-        hints = new String[]
+        questions = loadQuestionsFromJSON();
 
-                {
-                        getString(R.string.h1),
-                        getString(R.string.h2),
-                        getString(R.string.h3),
-                        getString(R.string.h4),
-                        getString(R.string.h5)
-                };
+
+        Gamble.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                gamble();
+            }
+        });
+
+        hintButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                if (currentind < questions.size() && questions.get(currentind).getHint() != null) {
+                    Toast.makeText(MainActivity.this, questions.get(currentind).getHint(), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this, "No hint available", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         showQuestion();
     }
 
-    private void gamble(){
-        boolean guess = Math.random() < 0.5;
-        boolean correctguess = questions[currentind].isRightAnswer();
-        Correct.setVisibility(View.INVISIBLE);
-        Wrong.setVisibility(View.VISIBLE);
+    private List<Question> loadQuestionsFromJSON() {
+        List<Question> questionList = new ArrayList<>();
+        try {
 
-        if(guess == correctguess){
-            Score = Score*2;
+            InputStream is = getAssets().open("sample.json");
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            String json = new String(buffer, StandardCharsets.UTF_8);
+
+
+            JSONObject jsonObject = new JSONObject(json);
+            JSONArray questionsArray = jsonObject.getJSONArray("questions");
+
+            for (int i = 0; i < questionsArray.length(); i++) {
+                JSONObject questionObj = questionsArray.getJSONObject(i);
+                String text = questionObj.getString("questionText");
+                boolean answer = questionObj.getBoolean("rightAnswer");
+                String hint = questionObj.optString("hint", null);
+
+                questionList.add(new Question(text, answer, hint));
+            }
+
+        } catch (IOException | JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error loading questions", Toast.LENGTH_LONG).show();
+            // Add fallback questions if file loading fails
+            questionList.add(new Question("Sample question?", true, "Sample hint"));
+        }
+
+        return questionList;
+    }
+
+    private void gamble() {
+        boolean guess = Math.random() < 0.5;
+        boolean correctguess = questions.get(currentind).isRightAnswer();
+        Correct.setVisibility(View.INVISIBLE);
+        Wrong.setVisibility(View.INVISIBLE);
+
+        if (guess == correctguess) {
+            Score = Score * 2;
             Correct.setVisibility(View.VISIBLE);
             Toast.makeText(MainActivity.this, "Gamble Win", Toast.LENGTH_SHORT).show();
-        }else{
-            Score = Score/2;
-
+        } else {
+            Score = Score / 2;
             Wrong.setVisibility(View.VISIBLE);
-            Toast.makeText(MainActivity.this,"Gamble Loss",Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "Gamble Loss", Toast.LENGTH_SHORT).show();
         }
         currentind++;
         showQuestion();
     }
 
-
-
-
-
     private void showQuestion() {
-        if (currentind < questions.length) {
-            QuestionText.setText(questions[currentind].getQuestionText());
+        if (currentind < questions.size()) {
+            QuestionText.setText(questions.get(currentind).getQuestionText());
+
+            trueB.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View V) {
+                    checkAnswer(true);
+                }
+            });
+
+            falseB.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    checkAnswer(false);
+                }
+            });
         } else {
+
+            if (Score > highScore) {
+                highScore = Score;
+                SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                editor.putInt(HIGH_SCORE_KEY, highScore);
+                editor.apply();
+            }
+
+
             Intent intent = new Intent(MainActivity.this, ScoreDisplay.class);
             intent.putExtra("SCORE", Score);
+            intent.putExtra("TOTAL_QUESTIONS", questions.size());
+            intent.putExtra("HIGH_SCORE", highScore);
             startActivity(intent);
         }
-
-        trueB.setOnClickListener(new OnClickListener() {
-            public void onClick(View V) {
-                checkAnswer(true);
-            }
-
-        });
-        falseB.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                checkAnswer(false);
-            }
-        });
     }
 
     private void checkAnswer(boolean userAnswer) {
         Correct.setVisibility(View.INVISIBLE);
         Wrong.setVisibility(View.INVISIBLE);
 
-        boolean correctAnswer = questions[currentind].isRightAnswer();
+        boolean correctAnswer = questions.get(currentind).isRightAnswer();
         if (userAnswer == correctAnswer) {
             Correct.setVisibility(View.VISIBLE);
             Score++;
-
         } else {
             Wrong.setVisibility(View.VISIBLE);
 
+            Score = 0;
         }
         currentind++;
         showQuestion();
     }
-
 }
-
-
