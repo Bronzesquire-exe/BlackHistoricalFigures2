@@ -21,6 +21,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
+
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
 public class MainActivity extends AppCompatActivity {
     private static final String PREFS_NAME = "QuizPrefs";
     private static final String HIGH_SCORE_KEY = "HighScore";
