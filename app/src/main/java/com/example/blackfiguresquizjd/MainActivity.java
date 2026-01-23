@@ -45,12 +45,13 @@ public class MainActivity extends AppCompatActivity {
     private Button hintButton;
     private Button Gamble;
 
+    private Firebase firebase;
+
     @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         QuestionText = findViewById(R.id.QuestionText);
         Gamble = findViewById(R.id.letsgamble);
@@ -68,22 +69,24 @@ public class MainActivity extends AppCompatActivity {
         highScore = prefs.getInt(HIGH_SCORE_KEY, 0);
 
 
-        questions = loadQuestionsFromJSON();
-
-
-        Gamble.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                gamble();
-            }
+        firebase = new Firebase(this);
+        firebase.signIn(() -> {
+            firebase.getScore(cloudScore -> {
+                if (cloudScore > highScore) {
+                    highScore = cloudScore;
+                }
+            });
         });
 
-        hintButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (currentind < questions.size() && questions.get(currentind).getHint() != null) {
-                    Toast.makeText(MainActivity.this, questions.get(currentind).getHint(), Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MainActivity.this, "No hint available", Toast.LENGTH_SHORT).show();
-                }
+        questions = loadQuestionsFromJSON();
+
+        Gamble.setOnClickListener(v -> gamble());
+
+        hintButton.setOnClickListener(v -> {
+            if (currentind < questions.size() && questions.get(currentind).getHint() != null) {
+                Toast.makeText(MainActivity.this, questions.get(currentind).getHint(), Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(MainActivity.this, "No hint available", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -93,14 +96,12 @@ public class MainActivity extends AppCompatActivity {
     private List<Question> loadQuestionsFromJSON() {
         List<Question> questionList = new ArrayList<>();
         try {
-
             InputStream is = getAssets().open("sample.json");
             int size = is.available();
             byte[] buffer = new byte[size];
             is.read(buffer);
             is.close();
             String json = new String(buffer, StandardCharsets.UTF_8);
-
 
             JSONObject jsonObject = new JSONObject(json);
             JSONArray questionsArray = jsonObject.getJSONArray("questions");
@@ -117,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
         } catch (IOException | JSONException e) {
             e.printStackTrace();
             Toast.makeText(this, "Error loading questions", Toast.LENGTH_LONG).show();
-            // Add fallback questions if file loading fails
             questionList.add(new Question("Sample question?", true, "Sample hint"));
         }
 
@@ -147,26 +147,19 @@ public class MainActivity extends AppCompatActivity {
         if (currentind < questions.size()) {
             QuestionText.setText(questions.get(currentind).getQuestionText());
 
-            trueB.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View V) {
-                    checkAnswer(true);
-                }
-            });
-
-            falseB.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    checkAnswer(false);
-                }
-            });
+            trueB.setOnClickListener(V -> checkAnswer(true));
+            falseB.setOnClickListener(v -> checkAnswer(false));
         } else {
 
             if (Score > highScore) {
                 highScore = Score;
+
+
                 SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-                SharedPreferences.Editor editor = prefs.edit();
-                editor.putInt(HIGH_SCORE_KEY, highScore);
-                editor.apply();
+                prefs.edit().putInt(HIGH_SCORE_KEY, highScore).apply();
+
+
+                firebase.saveScore(highScore);
             }
 
 
@@ -188,7 +181,6 @@ public class MainActivity extends AppCompatActivity {
             Score++;
         } else {
             Wrong.setVisibility(View.VISIBLE);
-
             Score = 0;
         }
         currentind++;

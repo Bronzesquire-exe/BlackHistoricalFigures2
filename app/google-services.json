@@ -1,6 +1,7 @@
 {
   "project_info": {
     "project_number": "693273107412",
+    "firebase_url": "https://blackhistoricalfigures-default-rtdb.firebaseio.com",
     "project_id": "blackhistoricalfigures",
     "storage_bucket": "blackhistoricalfigures.firebasestorage.app"
   },
