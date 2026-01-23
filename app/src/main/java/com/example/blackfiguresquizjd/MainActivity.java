@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         highScore = prefs.getInt(HIGH_SCORE_KEY, 0);
 
 
-        firebase = new Firebase(this);
+        firebase = new Firebase();
         firebase.signIn(() -> {
             firebase.getScore(cloudScore -> {
                 if (cloudScore > highScore) {

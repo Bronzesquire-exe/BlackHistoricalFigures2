@@ -1,8 +1,5 @@
 package com.example.blackfiguresquizjd;
 
-import android.content.Context;
-
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -15,54 +12,64 @@ public class Firebase {
     private FirebaseAuth auth;
     private String userId;
 
-    public Firebase(Context context) {
-
-        if (FirebaseApp.getApps(context).isEmpty()) {
-            FirebaseApp.initializeApp(context);
+    public Firebase() {
+        try {
+            database = FirebaseDatabase.getInstance().getReference("scores");
+            auth = FirebaseAuth.getInstance();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-
-        auth = FirebaseAuth.getInstance();
-        database = FirebaseDatabase.getInstance().getReference("scores");
     }
 
-
+    // Sign in and get user ID
     public void signIn(final Callback callback) {
-        if (auth.getCurrentUser() != null) {
-            userId = auth.getCurrentUser().getUid();
-            callback.onComplete();
-        } else {
-            auth.signInAnonymously().addOnCompleteListener(task -> {
-                if (task.isSuccessful() && auth.getCurrentUser() != null) {
-                    userId = auth.getCurrentUser().getUid();
-                    callback.onComplete();
-                }
-            });
+        try {
+            if (auth.getCurrentUser() != null) {
+                userId = auth.getCurrentUser().getUid();
+                callback.onComplete();
+            } else {
+                auth.signInAnonymously().addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && auth.getCurrentUser() != null) {
+                        userId = auth.getCurrentUser().getUid();
+                        callback.onComplete();
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-
+    // Save score to Firebase
     public void saveScore(int score) {
-        if (userId != null) {
-            database.child(userId).child("score").setValue(score);
+        try {
+            if (userId != null) {
+                database.child(userId).child("score").setValue(score);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-
+    // Get score from Firebase
     public void getScore(final ScoreCallback callback) {
-        if (userId != null) {
-            database.child(userId).child("score").addListenerForSingleValueEvent(new ValueEventListener() {
-                @Override
-                public void onDataChange(DataSnapshot snapshot) {
-                    Integer score = snapshot.getValue(Integer.class);
-                    callback.onScore(score != null ? score : 0);
-                }
+        try {
+            if (userId != null) {
+                database.child(userId).child("score").addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot snapshot) {
+                        Integer score = snapshot.getValue(Integer.class);
+                        callback.onScore(score != null ? score : 0);
+                    }
 
-                @Override
-                public void onCancelled(DatabaseError error) {
-                    callback.onScore(0);
-                }
-            });
+                    @Override
+                    public void onCancelled(DatabaseError error) {
+                        callback.onScore(0);
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
